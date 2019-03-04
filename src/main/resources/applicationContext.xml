@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:component-scan base-package="com.demo.service"></context:component-scan>
+    <!-- 1.加载小配置文件 -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- 2.创建数据库连接 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${driver}"></property>
+        <property name="url" value="${url}"></property>
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${password}"></property>
+        <!--连接池中的一些配置======start=========-->
+        <!-- 连接池中最大可能存放的连接数 -->
+        <property name="maxActive" value="100"></property>
+        <!-- 连接池中初始(最小)的连接数量 -->
+        <property name="initialSize" value="1"></property>
+        <!-- 获取连接时，最大的等待时长 -->
+        <property name="maxWait" value="2000"></property>
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+        <!--连接池中的一些配置======end=========-->
+    </bean>
+    <!-- 3.创建sqlSessionFactory(注入数据源，mapping映射文件,类名全限定名的定义) -->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+
+        <!-- 引入pageHelper配置文件=================start==============================-->
+        <property name="configLocation" value="classpath:SqlMapConfig.xml"/>
+        <!-- 引入pageHelper配置文件=================end==============================-->
+
+        <property name="mapperLocations">
+            <list>
+                <value>classpath:com/demo/dao/*DaoMapper.xml</value>
+            </list>
+        </property>
+        <property name="typeAliasesPackage" value="com.demo.entity"></property>
+    </bean>
+    <!-- 4.创建dao代理对象 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.demo.dao"></property>
+    </bean>
+    <!-- 5.事务管理器 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!-- 6.tx标签，增强处理， -->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="set*" read-only="true" />
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 6.2切入点规则 -->
+    <!--proxy-target-class="true"-->
+    <aop:config proxy-target-class="true">
+        <aop:pointcut expression="execution(* com.demo.service.*.*(..))" id="servicePointCut"/>
+        <!-- 6.3编织 -->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="servicePointCut"/>
+    </aop:config>
+
+    <bean id="userService" class="com.demo.service.impl.UserServiceImpl"></bean>
+
+</beans>

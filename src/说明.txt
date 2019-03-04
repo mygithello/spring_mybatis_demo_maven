@@ -1,0 +1,14 @@
+1.mysql数据库，阿里巴巴druid连接池。
+
+2.mybatis的一个强大的功能
+就是可以在bean对象的属性和数据库中存储的对象属性进行转换
+譬如bean中是list属性，存储到数据库中可以是array属性，bean中是java.util.Date属性，数据库中存储的是varchar类型的unix时间戳。
+示例：MybatisDateMapping表，com.demo.entity.MybatisDateMapping实体类  test:TestMybatisDateMapping
+使用到：mybatis已经提供的类org.apache.ibatis.type.DateTypeHandler
+
+3.mybatis集成spring下pagehelper的使用
+#1.在sqsesson配置pagehelper的配置
+#2.写SqlMapConfig.xml文件
+#3.修改SqlMapConfig.xml文件的扫描包
+eg:<typeAlias type="com.demo.entity.MybatisDateMapping" alias="MybatisDateMapping" />
+#4.根据版本配置SqlMapConfig.xml文件其他项(有些内容和版本有关，填写的话会报错)。

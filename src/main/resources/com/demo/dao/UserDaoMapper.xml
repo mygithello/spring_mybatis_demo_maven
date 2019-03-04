@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.dao.UserDao">
+
+	<!--user表，user实体类===========start===============================-->
+	<resultMap id="usersResult" type="com.demo.entity.User">
+		<result column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="password" property="password"/>
+	</resultMap>
+
+	<select id="selectAll" resultMap="usersResult">
+		SELECT * FROM user
+	</select>
+	<!--user表，user实体类===========end===============================-->
+
+
+	<!--MybatisDateMapping表，com.demo.entity.MybatisDateMapping实体类===========start=================-->
+	<!-- 自定义返回结果集 -->
+	<resultMap id="userMap" type="com.demo.entity.MybatisDateMapping">
+		<id property="id" column="id" javaType="java.lang.Integer"></id>
+		<result property="username" column="username" javaType="java.lang.String"></result>
+		<result property="password" column="password" javaType="java.lang.String"></result>
+		<result typeHandler="org.apache.ibatis.type.DateTypeHandler" column="regTime" javaType="java.util.Date"
+				jdbcType="VARCHAR"
+				property="regTime"/>
+	</resultMap>
+
+	<insert id="insertMybatisDateMapping" useGeneratedKeys="true" keyProperty="id">
+		insert into MybatisDateMapping (username,password,regTime) values (#{username},#{password},#{regTime,typeHandler=org.apache.ibatis.type.DateTypeHandler})
+	</insert>
+
+	<update id="updateMybatisDateMapping" >
+		update MybatisDateMapping set username=#{username},password=#{password},regTime=#{regTime,typeHandler=org.apache.ibatis.type.DateTypeHandler} where id=#{id}
+	</update>
+	
+	<select id="selectMybatisDateMapping" resultMap="userMap">
+		SELECT * FROM MybatisDateMapping
+	</select>
+	<!--MybatisDateMapping表，com.demo.entity.MybatisDateMapping实体类===========end=================-->
+
+</mapper>
+
+
